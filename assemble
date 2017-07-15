@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -eo pipefail
+
+echo " -----> Move source files into place."
+
+mv /tmp/src/* ./
+
+if [ -d /tmp/artifacts/cache ]; then
+    echo " -----> Restoring cache from incremental build."
+    mv /tmp/artifacts/cache/* /opt/app-root/cache/
+fi
+
+echo " -----> Upgrading Python packaging tools."
+
+pip install -U pip setuptools wheel
+
+if [ -f ./requirements.txt ]; then
+    echo " -----> Generating wheels for Python packages."
+    pip wheel -r ./requirements.txt
+fi

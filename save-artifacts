@@ -1,0 +1,3 @@
+#!/bin/bash
+
+tar -C $CACHE_DIR/.. -cf - cache

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+cat <<EOF
+This is a S2I builder image for generating wheels for Python packages.
+For instructions on using the S2I builder image see:
+
+* https://github.com/openshift-katacoda/python35-wheelhouse
+EOF
