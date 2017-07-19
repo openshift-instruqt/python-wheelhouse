@@ -97,7 +97,7 @@ oc new-build --name blog-wheelhouse \
 The resulting wheelhouse image is then used as an image source in the build configuration for an application.
 
 ```
-oc new-app --name <application-name> \
+oc new-build --name <application-name> \
   --image-stream python:3.5 \
   --code <source-files> \
   --source-image <application-name>-wheelhouse \
@@ -109,11 +109,18 @@ The ``assemble`` script for the application must be setup to configure ``pip`` t
 For a working example, try:
 
 ```
-oc new-app --name blog \
+oc new-build --name blog \
   --image-stream python:3.5 \
   --code https://github.com/openshift-katacoda/blog-django-py \
-  --source-image <application-name>-wheelhouse \
+  --source-image blog-wheelhouse \
   --source-image-path /opt/app-root/wheelhouse/.:.s2i/wheelhouse
+```
+
+When the build has finished, then deploy the image:
+
+```
+oc new-app --image-stream blog
+oc expose svc/blog
 ```
 
 Whenever the ``requirements.txt`` file is changed to add more Python packages, trigger a rebuild of the wheelhouse. Subsequent builds of the application will then be quicker as they will reuse the Python wheels from the wheelhouse image.
