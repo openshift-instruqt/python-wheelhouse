@@ -49,7 +49,7 @@ If wishing to build the image in OpenShift, for Python 3.5 you would use:
 ```
 oc new-build --strategy=source --name python35-wheelhouse \
   --code https://github.com/openshift-katacoda/python-wheelhouse \
-  --image-stream centos/python-35-centos7
+  --image-stream python:3.5
 ```
 
 For Python 2.7 you would use:
@@ -57,7 +57,7 @@ For Python 2.7 you would use:
 ```
 oc new-build --strategy=source --name python27-wheelhouse \
   --code https://github.com/openshift-katacoda/python-wheelhouse \
-  --image-stream centos/python-35-centos7
+  --image-stream python:2.7
 ```
 
 Using the ``s2i`` Command Line Tool
