@@ -2,20 +2,35 @@
 
 set -eo pipefail
 
+mkdir -p /opt/app-root/wheelhouse
+
+echo "Python Wheelhouse" > /opt/app-root/cache/README.txt
+
 echo " -----> Move source files into place."
 
 mv /tmp/src/* ./
 
 if [ -d /tmp/artifacts/cache ]; then
     echo " -----> Restoring cache from incremental build."
-    mv /tmp/artifacts/cache/* /opt/app-root/cache/
+    mv /tmp/artifacts/cache /opt/app-root/
 fi
 
 echo " -----> Upgrading Python packaging tools."
 
+export PIP_CACHE_DIR=/opt/app-root/cache/pip
+unset PIP_NO_CACHE_DIR
+
 pip install -U pip setuptools wheel
 
-if [ -f ./requirements.txt ]; then
-    echo " -----> Generating wheels for Python packages."
-    pip wheel -r ./requirements.txt
-fi
+echo " -----> Generating wheels for Python packages."
+
+REQUIREMENTS_FILE="${REQUIREMENTS_FILE:-requirements.txt}"
+
+for file in $REQUIREMENTS_FILES; do
+    if [ -f "$file" ]; then
+        echo " -----> Processing package file: $file."
+        pip wheel -r $file --wheel-dir /opt/app-root/wheelhouse
+    else
+        echo " -----> Skipping package file: $file."
+    fi
+done
