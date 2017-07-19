@@ -2,10 +2,6 @@
 
 set -eo pipefail
 
-mkdir -p /opt/app-root/wheelhouse
-
-echo "Python Wheelhouse" > /opt/app-root/cache/README.txt
-
 echo " -----> Move source files into place."
 
 mv /tmp/src/* ./

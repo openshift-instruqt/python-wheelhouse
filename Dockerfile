@@ -9,3 +9,5 @@ COPY assemble /opt/app-root/s2i/
 COPY run /opt/app-root/s2i/
 COPY save-artifacts /opt/app-root/s2i/
 COPY usage /opt/app-root/s2i/
+
+RUN mkdir /opt/app-root/wheelhouse

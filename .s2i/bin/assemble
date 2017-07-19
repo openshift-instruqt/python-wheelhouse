@@ -2,6 +2,10 @@
 
 set -eo pipefail
 
+# Create the wheelhouse directory.
+
+mkdir /opt/app-root/wheelhouse
+
 # Move assemble/run scripts to new location.
 
 mkdir /opt/app-root/s2i
