@@ -22,7 +22,7 @@ echo " -----> Generating wheels for Python packages."
 
 REQUIREMENTS_FILE="${REQUIREMENTS_FILE:-requirements.txt}"
 
-for file in $REQUIREMENTS_FILES; do
+for file in $REQUIREMENTS_FILE; do
     if [ -f "$file" ]; then
         echo " -----> Processing package file: $file."
         pip wheel -r $file --wheel-dir /opt/app-root/wheelhouse
