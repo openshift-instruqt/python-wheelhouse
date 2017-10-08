@@ -69,7 +69,7 @@ To use the S2I builder image created locally with the ``s2i`` command line tool 
 s2i build <source-files> python35-wheelhouse <image-name>
 ```
 
-Replace ``<source-files>`` with a local file system path, or a URL for a hosted Git repository which contains the requirements file describing the packages you want to turn into wheels. Replace ``<image-name>`` with the name you wish to use for the container image created.
+Replace ``<source-files>`` with a local file system path, or a URL for a hosted Git repository which contains the ``requirements.txt`` file describing the packages you want to turn into wheels. Replace ``<image-name>`` with the name you wish to use for the container image created.
 
 Use whatever technique is appropriate for your situation to copy the wheels created from the image. The wheels are located in the directory ``/opt/app-root/wheelhouse``.
 
