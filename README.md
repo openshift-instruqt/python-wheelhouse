@@ -101,12 +101,13 @@ oc new-build --name <application-name> \
   --image-stream python:3.5 \
   --code <source-files> \
   --source-image <application-name>-wheelhouse \
-  --source-image-path /opt/app-root/wheelhouse/.:.s2i/wheelhouse
+  --source-image-path /opt/app-root/wheelhouse/.:.s2i/wheelhouse \
+  --env PIP_FIND_LINKS=.s2i/wheelhouse
 ```
 
-The ``assemble`` script for the application must be setup to configure ``pip`` to use the wheelhouse directory.
+The ``PIP_FIND_LINKS`` could also be set in a ``.s2i/environment`` file, or in a custom ``assemble`` script.
 
-For a working example, try:
+For a working example which automatically detects the presence of the wheelhouse directory via a custom ``assemble`` script and sets ``PIP_FIND_LINKS``, try:
 
 ```
 oc new-build --name blog \
@@ -124,3 +125,61 @@ oc expose svc/blog
 ```
 
 Whenever the ``requirements.txt`` file is changed to add more Python packages, trigger a rebuild of the wheelhouse. Subsequent builds of the application will then be quicker as they will reuse the Python wheels from the wheelhouse image.
+
+How to Run a Disconnected Build
+-------------------------------
+
+The examples above rely on you still having access to PyPi to download the Python packages when building the wheelhouse. When building the application using the wheelhouse, it acts a local repository to speed up installs. If a version of a package isn't in the wheelhouse, or the version of the package is not pinned and a newer version is available on PyPi, then the package will still be downloaded and installed from PyPi.
+
+To create a Python wheelhouse and use it for builds in a totally disconnected environment where no Internet access is available, some additional steps and configuration are required.
+
+For a disconnected build you first need to download all the Python packages you want to be able to later install when the application is being built and deployed in OpenShift. Obviously for this step you will need to have Internet access available.
+
+Create an empty directory to contain all the packages you want to pull down and populate the Python wheelhouse with. Add to this directory the ``requirements.txt`` file listing the packages. Run the command:
+
+```
+pip download -r requirements.txt --dest packages
+```
+
+This will populate the ``packages`` subdirectory with everything which is downloaded.
+
+Because the Python S2I builders bundled with OpenShift do not always have the latest versions of the ``pip``, ``setuptools`` and ``wheel`` packages, the wheelhouse when being built will first attempt to update them to the latest version. If this is not done, various Python packages may not install correctly due to bugs in the older versions of these packages.
+
+You should also therefore run the following command to pull down latest versions of these packages.
+
+```
+pip download pip setuptools wheel --dest packages
+```
+
+Note that the above commands only download packages, they do not attempt to compile packages which have C extension components.
+
+Next we create the wheelhouse image from this directory. We are going to use a binary input build so the first create the build configuration.
+
+```
+oc new-build --name <application-name>-wheelhouse --binary \
+  --image-stream python35-wheelhouse \
+  --env PIP_FIND_LINKS=packages \
+  --env PIP_NO_INDEX=true
+```
+
+The ``PIP_NO_INDEX`` environment variable ensures that ``pip`` does not try and pull down packages from PyPi. The ``PIP_FIND_LINKS`` environment variable tells ``pip`` to instead look in the ``packages`` subdirectory where all the downloaded packages are installed.
+
+Trigger the build, uploading the contents of the current directory as the input for the build.
+
+```
+oc start-build <application-name>-wheelhouse --from-dir=.
+```
+
+The wheelhouse has now been created which contains all required packages, compiled into Python wheels.
+
+A build configuration for the application is created similar to before, but with the ``PIP_NO_INDEX`` environment variable also being set so ``pip`` doesn't attempt to download packages from PyPi.
+
+```
+oc new-build --name <application-name> \
+  --image-stream python:3.5 \
+  --code <source-files> \
+  --source-image <application-name>-wheelhouse \
+  --source-image-path /opt/app-root/wheelhouse/.:.s2i/wheelhouse \
+  --env PIP_FIND_LINKS=.s2i/wheelhouse \
+  --env PIP_NO_INDEX=true
+```
